@@ -1,4 +1,4 @@
-﻿namespace MXR.SDK {
+﻿namespace MXRUS.SDK {
     /// <summary>
     /// Provides directory compression and extraction capabilities
     /// </summary>

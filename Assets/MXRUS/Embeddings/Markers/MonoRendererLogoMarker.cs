@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Marks a 3D GameObject with a Renderer for showing a logo
     /// </summary>

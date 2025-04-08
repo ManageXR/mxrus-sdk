@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public interface ISceneExportValidator {
         List<SceneExportViolation> Validate();
     }

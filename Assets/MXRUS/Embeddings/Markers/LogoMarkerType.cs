@@ -1,4 +1,4 @@
-﻿namespace MXR.SDK {
+﻿namespace MXRUS.SDK {
     /// <summary>
     /// Refers to a logo deployed on the ManageXR dashboard
     /// </summary>

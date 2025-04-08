@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 using Object = UnityEngine.Object;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public class SceneExportWindow : EditorWindow {
         private const int FONT_SIZE_H1 = 16;
         private const int FONT_SIZE_H2 = 14;

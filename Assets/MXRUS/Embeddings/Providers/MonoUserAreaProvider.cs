@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Used to configure the user position and rotation, and walkable radius using a GameObject on the scene.
     /// Using Gizmos, it draws a primitive avatar at the start position and other visuals 

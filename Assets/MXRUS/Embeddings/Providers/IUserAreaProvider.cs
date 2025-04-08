@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Metadata embedding for the user area in an MXRUS environment
     /// </summary>
