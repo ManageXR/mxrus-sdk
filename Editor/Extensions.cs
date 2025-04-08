@@ -2,7 +2,7 @@ using System.Text;
 
 using UnityEditor.Build.Reporting;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public static class Extensions {
         public static string ToPrettyString(this BuildReport buildReport, int indentLength = 4) {
             StringBuilder sb = new StringBuilder();

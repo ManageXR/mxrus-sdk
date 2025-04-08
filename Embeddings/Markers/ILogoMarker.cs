@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Marks an object to show a logo on
     /// </summary>

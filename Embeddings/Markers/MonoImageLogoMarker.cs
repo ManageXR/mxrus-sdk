@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Marks a UI GameObject with Image component for showing a logo
     /// </summary>

@@ -1,6 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Loads a .mxrus file
     /// </summary>

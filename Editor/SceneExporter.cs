@@ -6,7 +6,7 @@ using UnityEditor.Build.Reporting;
 
 using UnityEngine;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public static class SceneExporter {
         private const string SCENE_ASSETBUNDLE_NAME = "scene";
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";

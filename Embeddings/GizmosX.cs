@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     public static class GizmosX {
         public static void DrawConcentricCirclesXZ(Vector3 center, float radius, int perimeterSegments, int count) {
             float distanceStep = radius / count;
