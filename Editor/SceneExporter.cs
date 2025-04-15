@@ -8,8 +8,11 @@ using UnityEngine;
 
 namespace MXRUS.SDK.Editor {
     public static class SceneExporter {
-        private const string SCENE_ASSETBUNDLE_NAME = "scene";
+        private const string SHADER_FILE_EXT = ".shader";
+        private const string CSHARP_FILE_EXT = ".cs";
+        private const string UNITY_FILE_EXT = ".unity";
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";
+        private const string SCENE_ASSETBUNDLE_NAME = "scene";
         private const string BUILD_REPORT_FILE_NAME = "build_report.txt";
         private const string FAILED_BUILD_REPORT_FILE_NAME = "failed_mxrus_build_report.txt";
         private readonly static string FAILED_BUILD_REPORT_FILE_PATH = Path.Combine(Application.dataPath.Replace("Assets", "Temp"), FAILED_BUILD_REPORT_FILE_NAME);
@@ -45,8 +48,9 @@ namespace MXRUS.SDK.Editor {
                     File.WriteAllText(FAILED_BUILD_REPORT_FILE_PATH, buildReport.ToPrettyString());
                     EditorUtility.DisplayDialog("Error", $"AssetBundle build failed. See {FAILED_BUILD_REPORT_FILE_PATH}", "OK");
                 }
-                else
+                else {
                     EditorUtility.DisplayDialog("Error", "AssetBundle build failed", "OK");
+                }
 
                 return buildReport;
             }
@@ -75,8 +79,8 @@ namespace MXRUS.SDK.Editor {
 
         private static string[] GetRelevantDependencies(string scenePath) {
             return AssetDatabase.GetDependencies(new string[] { scenePath })
-                .Where(x => !x.EndsWith(".cs"))
-                .Where(x => !x.EndsWith(".shader"))
+                .Where(x => !x.EndsWith(CSHARP_FILE_EXT))
+                .Where(x => !x.EndsWith(SHADER_FILE_EXT))
                 .ToArray();
         }
 
@@ -100,13 +104,13 @@ namespace MXRUS.SDK.Editor {
             // Identify the scenes and create an asset bundle build object
             AssetBundleBuild sceneBundleBuild = new AssetBundleBuild {
                 assetBundleName = SCENE_ASSETBUNDLE_NAME,
-                assetNames = dependencies.Where(x => x.EndsWith(".unity")).ToArray()
+                assetNames = dependencies.Where(x => x.EndsWith(UNITY_FILE_EXT)).ToArray()
             };
 
             // Identify the assets and create an asset bundle build object
             AssetBundleBuild assetsBundleBuild = new AssetBundleBuild {
                 assetBundleName = ASSETS_ASSETBUNDLE_NAME,
-                assetNames = dependencies.Where(x => !x.EndsWith(".unity")).ToArray()
+                assetNames = dependencies.Where(x => !x.EndsWith(UNITY_FILE_EXT)).ToArray()
             };
 
             // Build and export the asset bundles to the export directory
