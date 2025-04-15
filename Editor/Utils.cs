@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 
 namespace MXRUS.SDK.Editor {
-    public class Utils {
+    internal class Utils {
         public static BuildReport GetLatestBuildReport() {
             try {
                 // Get the build report from the Library directory by importing Library/LastBuild.buildReport

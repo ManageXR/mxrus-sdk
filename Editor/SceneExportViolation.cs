@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MXRUS.SDK.Editor {
-    public class SceneExportViolation {
+    internal class SceneExportViolation {
         /// <summary>
         /// Enumerates all the difference kind of violations 
         /// a scene can have that can prevent or affect export.
