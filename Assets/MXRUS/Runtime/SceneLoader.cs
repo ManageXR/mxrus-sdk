@@ -1,47 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace MXRUS.SDK {
     /// <summary>
     /// Loads an mxrus file. Provides loading states and access to internal AssetBundles
     /// </summary>
     public class SceneLoader : ISceneLoader {
-        const string TAG = "SceneLoader";
-        const string ASSETS_ASSETBUNDLE_NAME = "assets";
-        const string SCENE_ASSETBUNDLE_NAME = "scene";
-        const string TEMP_EXTRACT_DIRNAME_POSTFIX = "-extract";
-
-        /// <summary>
-        /// The different states the loader can be in
-        /// </summary>
-        public enum State {
-            /// <summary>
-            /// The instance is awaiting load operation.
-            /// This is the state the instance starts in.
-            /// On invoking <see cref="Unload"/>, the instance resets back to this state.
-            /// </summary>
-            Idle,
-
-            /// <summary>
-            /// The instance is currently loading an mxrus file.
-            /// </summary>
-            Loading,
-
-            /// <summary>
-            /// The instance failed to load an mxrus file. <see cref="_bundles"/> is empty.
-            /// </summary>
-            Error,
-
-            /// <summary>
-            /// The instance has successfully load an mxrus file and all asset bundles are available.
-            /// </summary>
-            Success
-        }
+        private const string TAG = "SceneLoader";
+        private const string ASSETS_ASSETBUNDLE_NAME = "assets";
+        private const string SCENE_ASSETBUNDLE_NAME = "scene";
+        private const string TEMP_EXTRACT_DIRNAME_POSTFIX = "-extract";
 
         private static string _defaultExtractsLocation = null;
         /// <summary>
@@ -66,30 +38,14 @@ namespace MXRUS.SDK {
         }
 
         /// <summary>
-        /// Path to the directory containing the mxrus extract
-        /// </summary>
-        public string ExtractLocation { get; private set; }
-
-        /// <summary>
         /// The current state of this instance
         /// </summary>
-        public State CurrentState { get; private set; } = State.Idle;
-
-        /// <summary>
-        /// The path to the mxrus file this instance is loading/has failed to load from/has successfully loaded from
-        /// Get assigned on invoking <see cref="Load"/>
-        /// </summary>
-        public string SourceFilePath { get; private set; }
-
-        /// <summary>
-        /// Returns whether the mxrus file has a scene that can be loaded
-        /// </summary>
-        public bool HasScene => !string.IsNullOrEmpty(ScenePath);
+        public SceneLoaderState State { get; private set; } = SceneLoaderState.Idle;
 
         /// <summary>
         /// Gets the path to the scene inside the <see cref="SCENE_ASSETBUNDLE_NAME"/> AssetBundle in the mxrus file
         /// </summary>
-        public string ScenePath {
+        private string ScenePath {
             get {
                 if (!_bundles.ContainsKey(SCENE_ASSETBUNDLE_NAME)) {
                     Debug.unityLogger.Log(LogType.Error, TAG, "scene asset bundle not loaded");
@@ -101,8 +57,18 @@ namespace MXRUS.SDK {
                     Debug.unityLogger.Log(LogType.Error, TAG, "There are no scenes in scene bundle");
                     return null;
                 }
+                else if (sceneBundle.GetAllScenePaths().Length > 1)
+                    Debug.unityLogger.Log(LogType.Warning, TAG, "There are multiple scenes in scene bundle.");
 
                 return sceneBundle.GetAllScenePaths()[0];
+            }
+        }
+
+        public string SceneName {
+            get {
+                if (string.IsNullOrEmpty(ScenePath))
+                    return null;
+                return Path.GetFileNameWithoutExtension(ScenePath);
             }
         }
 
@@ -121,21 +87,20 @@ namespace MXRUS.SDK {
         /// </summary>
         /// <returns></returns>
         public async Task<bool> Load(string sourceFilePath, string extractLocation = null) {
-            ExtractLocation = string.IsNullOrEmpty(extractLocation) ? DefaultExtractsLocation : extractLocation;
-            if (!Directory.Exists(ExtractLocation))
-                Directory.CreateDirectory(ExtractLocation);
+            // Determine extract location and ensure it exists
+            extractLocation = string.IsNullOrEmpty(extractLocation) ? DefaultExtractsLocation : extractLocation;
+            if (!Directory.Exists(extractLocation))
+                Directory.CreateDirectory(extractLocation);
 
             UnloadBundles();
-            CurrentState = State.Loading;
+            State = SceneLoaderState.Loading;
 
             Debug.unityLogger.Log(LogType.Log, TAG, $"Loading {sourceFilePath}");
 
-            // Initialize paths and ensure extract location directory
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(sourceFilePath);
             string extractDirName = fileNameWithoutExt + TEMP_EXTRACT_DIRNAME_POSTFIX;
-            string extractDirPath = Path.Combine(ExtractLocation, extractDirName);
+            string extractDirPath = Path.Combine(extractLocation, extractDirName);
 
-            SourceFilePath = sourceFilePath;
 
             // Extract the file to destination path
             Debug.unityLogger.Log(LogType.Log, TAG, $"Extracting {sourceFilePath} to {extractDirPath}");
@@ -165,12 +130,12 @@ namespace MXRUS.SDK {
             }
 
             if (failedBundleNames.Count == 0) {
-                CurrentState = State.Success;
+                State = SceneLoaderState.Success;
                 return true;
             }
             else {
                 UnloadBundles();
-                CurrentState = State.Error;
+                State = SceneLoaderState.Error;
                 var msg = $"Failed to load the following asset bundles: {string.Join(", ", failedBundleNames)}";
                 Debug.unityLogger.Log(LogType.Error, TAG, msg);
                 return false;
@@ -182,7 +147,7 @@ namespace MXRUS.SDK {
         /// </summary>
         public void Unload() {
             UnloadBundles();
-            CurrentState = State.Idle;
+            State = SceneLoaderState.Idle;
         }
 
         private void UnloadBundles() {

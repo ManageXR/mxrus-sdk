@@ -52,9 +52,24 @@ namespace MXRUS.SDK.Editor {
             MultipleUserAreaProvidersFound
         }
 
+        /// <summary>
+        /// The type of violation
+        /// </summary>
         public Types Type { get; private set; }
+
+        /// <summary>
+        /// Whether this violation prevents exporting an mxrus file
+        /// </summary>
         public bool PreventsExport { get; private set; }
+
+        /// <summary>
+        /// Description of the violation
+        /// </summary>
         public string Description { get; private set; }
+
+        /// <summary>
+        /// Reference to the object related to this violation
+        /// </summary>
         public Object Object { get; private set; }
 
         public SceneExportViolation(Types type, bool preventsExport, string description, Object obj) {
