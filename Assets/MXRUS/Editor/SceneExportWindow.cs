@@ -23,7 +23,12 @@ namespace MXRUS.SDK.Editor {
 
         private string _exportPath;
         private bool _keepExportDir;
+
         private List<SceneExportViolation> _violations;
+        private List<SceneExportViolation.Types> _violationTypes;
+        private List<bool> _foldoutStates;
+        private GUIStyle _errorFoldoutStyle;
+        private GUIStyle _warningFoldoutStyle;
 
         private BuildReport _buildReport;
         private Type[] _typesInBuild;
@@ -45,6 +50,18 @@ namespace MXRUS.SDK.Editor {
             window.titleContent = new GUIContent("MXR Scene Exporter");
             window.minSize = new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT);
             window.maxSize = new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+            window._errorFoldoutStyle = new GUIStyle(EditorStyles.foldout);
+            window._errorFoldoutStyle.normal.textColor = Color.red;
+            window._errorFoldoutStyle.onNormal.textColor = Color.red;
+            window._errorFoldoutStyle.fontSize = 14;
+            window._errorFoldoutStyle.fontStyle = FontStyle.Bold;
+
+            window._warningFoldoutStyle = new GUIStyle(EditorStyles.foldout);
+            window._warningFoldoutStyle.normal.textColor = Color.yellow;
+            window._warningFoldoutStyle.onNormal.textColor = Color.yellow;
+            window._warningFoldoutStyle.fontSize = 14;
+            window._warningFoldoutStyle.fontStyle = FontStyle.Bold;
         }
 
         private void OnGUI() {
@@ -87,8 +104,9 @@ namespace MXRUS.SDK.Editor {
             }
 
             GUILayout.Space(20);
-            if (GUILayout.Button("Validate Scene", GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth)))
-                _violations = new SceneExportValidator().Validate();
+            if (GUILayout.Button("Validate Scene", GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth))) {
+                Validate();
+            }
 
             // If violations is null, the scene is yet to be validated. We don't go past the validate button.
             if (_violations == null)
@@ -105,7 +123,7 @@ namespace MXRUS.SDK.Editor {
                 if (GUILayout.Button("Export Scene")) {
                     // Validate again before attempting export in case violating changes
                     // were made on the scene after successful validation previously
-                    _violations = new SceneExportValidator().Validate();
+                    Validate();
                     if (_violations.Count > 0) {
                         // If there are export preventing violations, return
                         if (_violations.Where(x => x.PreventsExport).Count() > 0)
@@ -160,6 +178,12 @@ namespace MXRUS.SDK.Editor {
             ShowViolationsSummary();
         }
 
+        private void Validate() {
+            _violations = new SceneExportValidator().Validate();
+            _violationTypes = _violations.Select(x => x.Type).Distinct().ToList();
+            _foldoutStates = _violationTypes.Select(x => false).ToList();
+        }
+
         private void ShowViolationsSummary() {
             if (_violations == null || _violations.Count == 0)
                 return;
@@ -172,25 +196,27 @@ namespace MXRUS.SDK.Editor {
 
             // Heading
             Label("Your scene has some issues.", FONT_SIZE_H1);
-            EditorGUILayout.Space(5);
-            Label("The ones highlighted RED must be addressed for export.\n" +
-            $"The {(EditorGUIUtility.isProSkin ? "white" : "black")} ones may be ignored but it is recommended you fix them.", FONT_SIZE_H2);
             EditorGUILayout.Space(20);
 
-            var violationTypes = _violations.Select(x => x.Type).Distinct().ToArray();
+            for (int i = 0; i < _violationTypes.Count(); i++) {
+                _foldoutStates[i] = EditorGUILayout.Foldout(
+                    _foldoutStates[i], 
+                    $"{_violationTypes[i]} {(_violations[i].PreventsExport ? " (Error)" : "(Warning)")}", 
+                    true, 
+                    _violations[i].PreventsExport ? _errorFoldoutStyle : _warningFoldoutStyle
+                );
+                EditorGUILayout.Space(10);
 
-            for (int i = 0; i < violationTypes.Count(); i++) {
+                if (!_foldoutStates[i]) continue;
+
                 // Print the violation description
-                var first = _violations.First(x => x.Type == violationTypes[i]);
-                if (!first.PreventsExport)
-                    Label((i + 1) + ". " + first.Description, FONT_SIZE_H2);
-                else
-                    Label((i + 1) + ". " + first.Description, Color.red, FONT_SIZE_H2);
+                var first = _violations.First(x => x.Type == _violationTypes[i]);
+                Label(first.Description, FONT_SIZE_H2);
 
                 EditorGUILayout.Space(10);
 
                 // Show the relevant objects of the violation
-                foreach (var violation in _violations.Where(x => x.Type == violationTypes[i])) {
+                foreach (var violation in _violations.Where(x => x.Type == _violationTypes[i])) {
                     if (violation.Object)
                         EditorGUILayout.ObjectField(violation.Object, violation.Object.GetType(), true);
                     EditorGUILayout.Space(10);
