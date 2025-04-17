@@ -11,11 +11,17 @@ namespace MXRUS.SDK.Editor {
         private const string SHADER_FILE_EXT = ".shader";
         private const string CSHARP_FILE_EXT = ".cs";
         private const string UNITY_FILE_EXT = ".unity";
+
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";
         private const string SCENE_ASSETBUNDLE_NAME = "scene";
+        
         private const string BUILD_REPORT_FILE_NAME = "build_report.txt";
         private const string FAILED_BUILD_REPORT_FILE_NAME = "failed_mxrus_build_report.txt";
         private readonly static string FAILED_BUILD_REPORT_FILE_PATH = Path.Combine(Application.dataPath.Replace("Assets", "Temp"), FAILED_BUILD_REPORT_FILE_NAME);
+
+        private const int PREVIEW_IMAGE_WIDTH = 1920;
+        private const int PREVIEW_IMAGE_HEIGHT = 1080;
+        private const string PREVIEW_IMAGE_FILE_NAME = "mxr_env_preview.jpg";
 
         /// <summary>
         /// Exports a scene into a zip arachive containing three asset bundles and their manifests:
@@ -31,6 +37,11 @@ namespace MXRUS.SDK.Editor {
             // Setup export directory
             var exportDir = GetExportDirectory(outputFilePath);
             EnsureEmptyDirectory(exportDir);
+
+            // Render a preview and write it to a jpg file inside the export directory
+            var previewImageBytes = GetPreviewImageBytes();
+            if (previewImageBytes != null)
+                File.WriteAllBytes(Path.Combine(exportDir, PREVIEW_IMAGE_FILE_NAME), previewImageBytes);
 
             // Delete any previous failed build report
             if (File.Exists(FAILED_BUILD_REPORT_FILE_PATH)) {
@@ -124,6 +135,41 @@ namespace MXRUS.SDK.Editor {
 
         private static bool DidBuildSucceed(AssetBundleManifest manifest, BuildReport buildReport) {
             return manifest != null && buildReport != null && buildReport.summary.result == BuildResult.Succeeded;
+        }
+
+        private static byte[] GetPreviewImageBytes() {
+            var userArea = Object.FindObjectOfType<MonoUserAreaProvider>();
+
+            if (userArea == null)
+                return null;
+
+            GameObject camGameObject = new GameObject("Temp preview camera");
+            Camera cam = camGameObject.AddComponent<Camera>();
+            cam.transform.position = userArea.UserStartPosition;
+            cam.transform.rotation = userArea.UserStartRotation;
+            cam.transform.Translate(0, 1.8f, 0, Space.World);
+
+            RenderTexture newRT = new RenderTexture(PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT, 24);
+            cam.targetTexture = newRT;
+            RenderTexture prevRT = RenderTexture.active;
+            RenderTexture.active = newRT;
+
+            cam.Render();
+
+            Texture2D preview = new Texture2D(PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT, TextureFormat.RGB24, false);
+            preview.ReadPixels(new Rect(0, 0, PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT), 0, 0);
+            preview.Apply();
+            byte[] result = preview.EncodeToJPG();
+
+            RenderTexture.active = prevRT;
+            cam.targetTexture = null;
+
+            Object.DestroyImmediate(preview);
+            newRT.Release();
+            Object.DestroyImmediate(newRT);
+            Object.DestroyImmediate(camGameObject);
+
+            return result;
         }
     }
 }
