@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace MXRUS.SDK.Editor {
-    public class SceneExportWindow : EditorWindow {
+    internal class SceneExportWindow : EditorWindow {
         private const int FONT_SIZE_H1 = 16;
         private const int FONT_SIZE_H2 = 14;
         private const int FONT_SIZE_H3 = 12;

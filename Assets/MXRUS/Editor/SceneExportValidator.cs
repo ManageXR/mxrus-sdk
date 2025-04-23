@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 
 namespace MXRUS.SDK.Editor {
-    public class SceneExportValidator : ISceneExportValidator {
+    internal class SceneExportValidator : ISceneExportValidator {
         /// <summary>
         /// Returns a list of violations in the active scene
         /// </summary>

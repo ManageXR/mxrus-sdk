@@ -7,7 +7,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace MXRUS.SDK.Editor {
-    public static class SceneExporter {
+    internal static class SceneExporter {
         private const string SHADER_FILE_EXT = ".shader";
         private const string CSHARP_FILE_EXT = ".cs";
         private const string UNITY_FILE_EXT = ".unity";

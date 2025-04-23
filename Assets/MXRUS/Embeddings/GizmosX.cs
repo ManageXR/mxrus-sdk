@@ -1,8 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 namespace MXRUS.SDK {
-    public static class GizmosX {
+    internal static class GizmosX {
         public static void DrawConcentricCirclesXZ(Vector3 center, float radius, int perimeterSegments, int count) {
+            if (count == 0)
+                throw new ArgumentException("Cannot be 0", nameof(count));
+
             float distanceStep = radius / count;
 
             for (int i = 1; i <= count; i++) {

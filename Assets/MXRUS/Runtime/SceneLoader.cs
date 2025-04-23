@@ -6,16 +6,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MXRUS.SDK {
-    /// <summary>
-    /// Loads an mxrus file. Provides loading states and access to internal AssetBundles
-    /// </summary>
     public class SceneLoader : ISceneLoader {
         private const string TAG = "SceneLoader";
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";
         private const string SCENE_ASSETBUNDLE_NAME = "scene";
         private const string TEMP_EXTRACT_DIRNAME_POSTFIX = "-extract";
+        
+        private readonly Dictionary<string, AssetBundle> _bundles = new Dictionary<string, AssetBundle>();
 
-        private static string _defaultExtractsLocation = null;
         /// <summary>
         /// The global folder where .mxrus files will be extracted by default
         /// </summary>
@@ -36,16 +34,11 @@ namespace MXRUS.SDK {
                 _defaultExtractsLocation = value;
             }
         }
+        private static string _defaultExtractsLocation = null;
 
-        /// <summary>
-        /// The current state of this instance
-        /// </summary>
         public SceneLoaderState State { get; private set; } = SceneLoaderState.Idle;
 
-        /// <summary>
-        /// Gets the path to the scene inside the <see cref="SCENE_ASSETBUNDLE_NAME"/> AssetBundle in the mxrus file
-        /// </summary>
-        private string ScenePath {
+        public string SceneName {
             get {
                 if (!_bundles.ContainsKey(SCENE_ASSETBUNDLE_NAME)) {
                     Debug.unityLogger.Log(LogType.Error, TAG, "scene asset bundle not loaded");
@@ -53,39 +46,26 @@ namespace MXRUS.SDK {
                 }
 
                 var sceneBundle = _bundles[SCENE_ASSETBUNDLE_NAME];
-                if (sceneBundle.GetAllScenePaths().Length == 0) {
+                var scenePaths = sceneBundle.GetAllScenePaths();
+                if (scenePaths.Length == 0) {
                     Debug.unityLogger.Log(LogType.Error, TAG, "There are no scenes in scene bundle");
                     return null;
                 }
-                else if (sceneBundle.GetAllScenePaths().Length > 1)
-                    Debug.unityLogger.Log(LogType.Warning, TAG, "There are multiple scenes in scene bundle.");
+                else if (scenePaths.Length > 1)
+                    Debug.unityLogger.Log(LogType.Warning, TAG, "There are multiple scenes in scene bundle. " +
+                        "Only the name of the scene at index 0 will be returned.");
 
-                return sceneBundle.GetAllScenePaths()[0];
-            }
-        }
-
-        public string SceneName {
-            get {
-                if (string.IsNullOrEmpty(ScenePath))
+                var scenePath = sceneBundle.GetAllScenePaths()[0];
+                if (string.IsNullOrEmpty(scenePath))
                     return null;
-                return Path.GetFileNameWithoutExtension(ScenePath);
+                return Path.GetFileNameWithoutExtension(scenePath);
             }
         }
 
-        /// <summary>
-        /// The AssetBundle containing the scene assets. Just loading <see cref="Scene"/>
-        /// should be enough to create the scene at runtime, but this can be used to get access
-        /// to the individual assets used in the mxrus file.
-        /// </summary>
         public AssetBundle Assets =>
             _bundles.ContainsKey(ASSETS_ASSETBUNDLE_NAME) ? _bundles[ASSETS_ASSETBUNDLE_NAME] : null;
 
-        private readonly Dictionary<string, AssetBundle> _bundles = new Dictionary<string, AssetBundle>();
 
-        /// <summary>
-        /// Asynchronously loads an mxrus file
-        /// </summary>
-        /// <returns></returns>
         public async Task<bool> Load(string sourceFilePath, string extractLocation = null) {
             // Determine extract location and ensure it exists
             extractLocation = string.IsNullOrEmpty(extractLocation) ? DefaultExtractsLocation : extractLocation;
@@ -142,9 +122,6 @@ namespace MXRUS.SDK {
             }
         }
 
-        /// <summary>
-        /// Unloads any mxrus file and its AssetBundles that may have been loaded previously
-        /// </summary>
         public void Unload() {
             UnloadBundles();
             State = SceneLoaderState.Idle;
