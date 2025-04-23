@@ -3,7 +3,7 @@
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public class Utils {
         public static BuildReport GetLatestBuildReport() {
             try {

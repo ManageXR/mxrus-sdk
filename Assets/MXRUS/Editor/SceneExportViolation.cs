@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace MXR.SDK.Editor {
+namespace MXRUS.SDK.Editor {
     public class SceneExportViolation {
         /// <summary>
         /// Enumerates all the difference kind of violations 

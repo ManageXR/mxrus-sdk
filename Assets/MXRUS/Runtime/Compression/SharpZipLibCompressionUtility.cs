@@ -4,7 +4,7 @@ using Unity.SharpZipLib.Zip;
 
 using UnityEngine;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// <see cref="ICompressionUtility"/> based on SharpZipLib 
     /// </summary>

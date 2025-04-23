@@ -7,7 +7,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace MXR.SDK {
+namespace MXRUS.SDK {
     /// <summary>
     /// Loads an mxrus file. Provides loading states and access to internal AssetBundles
     /// </summary>
