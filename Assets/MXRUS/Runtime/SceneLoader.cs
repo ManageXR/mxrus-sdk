@@ -66,12 +66,9 @@ namespace MXRUS.SDK {
         }
 
         /// <summary>
-        /// The folder where this instance will extract .mxrus files to by default.
-        /// In the editor this is the Temp/ directory of the Unity Project
-        /// In a build it is the persistent data path
+        /// Path to the directory containing the mxrus extract
         /// </summary>
         public string ExtractLocation { get; private set; }
-             = Application.isEditor ? Application.dataPath.Replace("Assets", "Temp") : Application.persistentDataPath;
 
         /// <summary>
         /// The current state of this instance
