@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
-using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -124,7 +123,7 @@ namespace MXRUS.SDK {
         /// Asynchronously loads an mxrus file
         /// </summary>
         /// <returns></returns>
-        public async UniTask<bool> Load(string sourceFilePath, string extractLocation = null) {
+        public async Task<bool> Load(string sourceFilePath, string extractLocation = null) {
             ExtractLocation = string.IsNullOrEmpty(extractLocation) ? DefaultExtractsLocation : extractLocation;
             if (!Directory.Exists(ExtractLocation))
                 Directory.CreateDirectory(ExtractLocation);
@@ -196,18 +195,18 @@ namespace MXRUS.SDK {
             _bundles.Clear();
         }
 
-        private async UniTask<AssetBundle> LoadAssetBundleAsync(string path) {
+        private Task<AssetBundle> LoadAssetBundleAsync(string path) {
+            var source = new TaskCompletionSource<AssetBundle>();
             var loadRequest = AssetBundle.LoadFromFileAsync(path);
-            loadRequest.allowSceneActivation = false;
-
-            var assetBundle = await loadRequest;
-
-            if (assetBundle != null) {
-                return assetBundle;
-            }
-            else {
-                return null;
-            }
+            loadRequest.completed += operation => {
+                if (operation.isDone && loadRequest.assetBundle != null) {
+                    source.SetResult(loadRequest.assetBundle);
+                }
+                else {
+                    source.SetException(new Exception("Failed to load asset bundle " + path));
+                }
+            };
+            return source.Task;
         }
     }
 }
