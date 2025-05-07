@@ -88,8 +88,11 @@ namespace MXRUS.SDK.Editor {
                 });
             return unsupportedMaterials.Select(x => new SceneExportViolation(
                 SceneExportViolation.Types.UnsupportedShader,
-                true,
-                "Only default URP, Unlit, UI, Sprites and Skybox shaders are supported.",
+                false,
+                "URP, Unlit, UI, Sprites, Skybox and official ManageXR shaders are recommended. " +
+                "Other shaders may not run as expected.\n" +
+                "Use them only if really required to achieve certain visuals and verify the results before deploying." +
+                "These shaders may also increase the export size and they often can be replaced with the recommended ones.",
                 x)).ToList();
         }
 
