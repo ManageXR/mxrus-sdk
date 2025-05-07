@@ -29,6 +29,8 @@ namespace MXRUS.SDK.Editor {
             if (userAreaViolations != null)
                 violations.AddRange(GetUserAreaViolations());
 
+            violations.AddRange(GetAudioListenerViolations());
+
             return violations;
         }
 
@@ -151,6 +153,23 @@ namespace MXRUS.SDK.Editor {
                 "Consider lightmapping your scene with baked lights. " +
                 "Only use Realtime or Mixed lights if you truly need them " +
                 "as they can impact performance.",
+                x
+            )).ToList();
+        }
+
+        /// <summary>
+        /// Checks if there are AudioListener components in the scene. There can only
+        /// be one AudioListener at a time and the ManageXR Homescreen already has one
+        /// on its XR Rig.
+        /// </summary>
+        /// <returns></returns>
+        private List<SceneExportViolation> GetAudioListenerViolations() {
+            var audioListeners = Object.FindObjectsOfType<AudioListener>().ToList();
+            return audioListeners.Select(x => new SceneExportViolation(
+                SceneExportViolation.Types.AudioListenerFound,
+                true,
+                "The scene cannot have any AudioListeners. When running in the ManageXR " +
+                "Homescreen, an AudioListener would already be present.",
                 x
             )).ToList();
         }
