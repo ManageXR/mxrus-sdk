@@ -49,7 +49,12 @@ namespace MXRUS.SDK.Editor {
             /// <summary>
             /// If the scene has multiple user area providers
             /// </summary>
-            MultipleUserAreaProvidersFound
+            MultipleUserAreaProvidersFound,
+
+            /// <summary>
+            /// if the scene has an AudioListener 
+            /// </summary>
+            AudioListenerFound
         }
 
         /// <summary>
