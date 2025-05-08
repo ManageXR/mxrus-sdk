@@ -150,7 +150,7 @@ namespace MXRUS.SDK.Editor {
 
                     // If the user selects a file destination, perform the export
                     if (!string.IsNullOrEmpty(_exportPath)) {
-                        _buildReport = SceneExporter.ExportScene(activeScene.path, _exportPath, BuildTarget.StandaloneWindows, !_keepExportDir);
+                        _buildReport = SceneExporter.ExportScene(activeScene.path, _exportPath, BuildTarget.Android, !_keepExportDir);
                         _currAssetType = 0;
 
                         // If the build was successful, we extract some data out for GUI rendering.
