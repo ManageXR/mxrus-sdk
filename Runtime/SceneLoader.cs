@@ -4,14 +4,16 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using UnityEngine;
+using System.Linq;
 
 namespace MXRUS.SDK {
     public class SceneLoader : ISceneLoader {
         private const string TAG = "SceneLoader";
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";
         private const string SCENE_ASSETBUNDLE_NAME = "scene";
+        private const string UNITY_GENERATED_ASSET_BUNDLE_EXT = ".unitygenerated";
         private const string TEMP_EXTRACT_DIRNAME_POSTFIX = "-extract";
-        
+
         private readonly Dictionary<string, AssetBundle> _bundles = new Dictionary<string, AssetBundle>();
 
         /// <summary>
@@ -88,7 +90,11 @@ namespace MXRUS.SDK {
             compressionUtility.ExtractToDirectory(sourceFilePath, extractDirPath);
 
             // Attempt to load the bundles from the extract directory
-            var bundleNames = new string[] { ASSETS_ASSETBUNDLE_NAME, SCENE_ASSETBUNDLE_NAME, fileNameWithoutExt };
+            var bundleNames = new string[] { 
+                ASSETS_ASSETBUNDLE_NAME, 
+                SCENE_ASSETBUNDLE_NAME, 
+                GetUnityGeneratedBundleName(extractDirPath)
+            };
             Debug.unityLogger.Log(LogType.Log, TAG, $"Attempting to load the following asset bundles: {string.Join(", ", bundleNames)}");
 
             List<string> failedBundleNames = new List<string>();
@@ -146,6 +152,14 @@ namespace MXRUS.SDK {
                 }
             };
             return source.Task;
+        }
+
+        // Unity generates an additional asset bundle when we export the mxrus file
+        // During export, this file is renamed to have a custom extension that can be used
+        // to find it.
+        private string GetUnityGeneratedBundleName(string directoryPath) {
+            return Directory.GetFiles(directoryPath, "*", SearchOption.TopDirectoryOnly)
+                .First(x => Path.GetExtension(x).Equals(UNITY_GENERATED_ASSET_BUNDLE_EXT));
         }
     }
 }
