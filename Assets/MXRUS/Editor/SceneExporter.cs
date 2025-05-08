@@ -14,6 +14,7 @@ namespace MXRUS.SDK.Editor {
 
         private const string ASSETS_ASSETBUNDLE_NAME = "assets";
         private const string SCENE_ASSETBUNDLE_NAME = "scene";
+        private const string UNITY_GENERATED_ASSET_BUNDLE_EXT = ".unitygenerated";
         
         private const string BUILD_REPORT_FILE_NAME = "build_report.txt";
         private const string FAILED_BUILD_REPORT_FILE_NAME = "failed_mxrus_build_report.txt";
@@ -68,6 +69,11 @@ namespace MXRUS.SDK.Editor {
 
             // Write the build report inside the export directory
             File.WriteAllText(Path.Combine(exportDir, BUILD_REPORT_FILE_NAME), buildReport.ToPrettyString());
+
+            // Add a custom extension to the unity generated asset bundle
+            // The name of this asset bundle is the same as the mxrus file being exported, but with no extension
+            var generatedAssetBundlePath = Path.Combine(exportDir, Path.GetFileNameWithoutExtension(outputFilePath));
+            File.Move(generatedAssetBundlePath, generatedAssetBundlePath + UNITY_GENERATED_ASSET_BUNDLE_EXT);
 
             // Compress export directory to the output file path
             ICompressionUtility zipCompression = new SharpZipLibCompressionUtility();

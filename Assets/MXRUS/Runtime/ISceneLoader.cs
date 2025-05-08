@@ -28,7 +28,7 @@ namespace MXRUS.SDK {
         /// <param name="sourceFilePath">Path to the mxrus file to load</param>
         /// <param name="extractLocation">Directory used to extract the mxrus file temporarily</param>
         /// <returns></returns>
-        Task<bool> Load(string sourceFilePath, string extractLocation);
+        Task<bool> Load(string sourceFilePath, string extractLocation = null);
 
         /// <summary>
         /// Unloads the AssetBundles of an mxrus file that may have been loaded previously.
