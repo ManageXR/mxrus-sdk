@@ -147,7 +147,7 @@ namespace MXRUS.SDK.Editor {
                     var directory = Application.dataPath.Replace("Assets", "");
                     var defaultName = Path.GetFileNameWithoutExtension(activeScene.path);
                     _exportPath = EditorUtility.SaveFilePanel("Export scene", directory, defaultName, EXPORT_FILE_EXTENSION);
-                    
+
                     // If the user selects a file destination, perform the export
                     if (!string.IsNullOrEmpty(_exportPath)) {
                         _buildReport = SceneExporter.ExportScene(activeScene.path, _exportPath, BuildTarget.StandaloneWindows, !_keepExportDir);
@@ -199,29 +199,34 @@ namespace MXRUS.SDK.Editor {
             EditorGUILayout.Space(20);
 
             for (int i = 0; i < _violationTypes.Count(); i++) {
+                var violations = _violations.Where(x => x.Type == _violationTypes[i]).ToArray();
+                var first = violations.FirstOrDefault();
+                if (first == null) {
+                    continue;
+                }
+
+                var preventsExport = first.PreventsExport;
+                var description = first.Description;
+
                 _foldoutStates[i] = EditorGUILayout.Foldout(
-                    _foldoutStates[i], 
-                    $"{_violationTypes[i]} {(_violations[i].PreventsExport ? " (Error)" : "(Warning)")}", 
-                    true, 
-                    _violations[i].PreventsExport ? _errorFoldoutStyle : _warningFoldoutStyle
+                    _foldoutStates[i],
+                    $"{_violationTypes[i]} {(preventsExport ? " (Error)" : " (Warning)")}",
+                    true,
+                    preventsExport ? _errorFoldoutStyle : _warningFoldoutStyle
                 );
                 EditorGUILayout.Space(10);
 
                 if (!_foldoutStates[i]) continue;
 
                 // Print the violation description
-                var first = _violations.First(x => x.Type == _violationTypes[i]);
-                Label(first.Description, FONT_SIZE_H2);
-
-                EditorGUILayout.Space(10);
+                Label(description, FONT_SIZE_H2);
 
                 // Show the relevant objects of the violation
                 foreach (var violation in _violations.Where(x => x.Type == _violationTypes[i])) {
-                    if (violation.Object)
+                    if (violation.Object != null)
                         EditorGUILayout.ObjectField(violation.Object, violation.Object.GetType(), true);
                     EditorGUILayout.Space(10);
                 }
-                EditorGUILayout.Space(10);
             }
         }
 
