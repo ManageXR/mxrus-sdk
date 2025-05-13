@@ -200,7 +200,7 @@ namespace MXRUS.SDK.Editor {
         /// </summary>
         /// <returns></returns>
         private List<SceneExportViolation> GetUserAreaViolations() {
-            var userAreas = Object.FindObjectsOfType<MonoUserAreaProvider>();
+            var userAreas = Object.FindObjectsOfType<MonoCircularUserAreaProvider>();
             if (userAreas.Length == 0)
                 return new List<SceneExportViolation> {
                     new SceneExportViolation (
