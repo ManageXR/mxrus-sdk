@@ -144,7 +144,7 @@ namespace MXRUS.SDK.Editor {
         }
 
         private static byte[] GetPreviewImageBytes() {
-            var userArea = Object.FindObjectOfType<MonoUserAreaProvider>();
+            var userArea = Object.FindObjectOfType<MonoCircularUserAreaProvider>();
 
             if (userArea == null)
                 return null;
