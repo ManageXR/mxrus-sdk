@@ -31,6 +31,10 @@ namespace MXRUS.SDK.Editor {
 
             violations.AddRange(GetAudioListenerViolations());
 
+            var sceneNameViolations = GetSceneNameViolation();
+            if (sceneNameViolations != null)
+                violations.Add(sceneNameViolations);
+
             return violations;
         }
 
@@ -214,6 +218,26 @@ namespace MXRUS.SDK.Editor {
                     x
                 ))
                 .ToList();
+            }
+            return null;
+        }
+
+        private SceneExportViolation GetSceneNameViolation() {
+            List<string> reservedNames = new List<string> {
+                "Launcher",
+                "Video",
+                "OculusQuest",
+                "Pico",
+                "Wave"
+            };
+
+            var activeScene = SceneManager.GetActiveScene();
+            if(reservedNames.Contains(activeScene.name)) {
+                return new SceneExportViolation(
+                    SceneExportViolation.Types.SceneNameViolation,
+                    true,
+                    $"The scene name not allowed. The following names are prohibited: {string.Join(", ", reservedNames)}"
+                );
             }
             return null;
         }
