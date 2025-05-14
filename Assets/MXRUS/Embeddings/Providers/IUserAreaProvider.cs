@@ -14,10 +14,5 @@ namespace MXRUS.SDK {
         /// The start rotation (direction) of the user in this environment.
         /// </summary>
         Quaternion UserStartRotation { get; }
-
-        /// <summary>
-        /// The distance the user is allowed to walk around in relative to <see cref="UserStartPosition"/>
-        /// </summary>
-        float UserWalkableRadius { get; }
     }
 }

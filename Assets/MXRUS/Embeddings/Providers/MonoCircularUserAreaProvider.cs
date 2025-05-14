@@ -7,7 +7,7 @@ namespace MXRUS.SDK {
     /// representing start rotation and walkable radius.
     /// </summary>
     [ExecuteInEditMode]
-    public class MonoUserAreaProvider : MonoBehaviour, IUserAreaProvider {
+    public class MonoCircularUserAreaProvider : MonoBehaviour, ICircularUserAreaProvider {
         // consts used for creating avatar gizmos
         private const float BODY_HEIGHT = 1.4f;
         private const float HEAD_RADIUS = 0.2f;
