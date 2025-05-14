@@ -52,9 +52,14 @@ namespace MXRUS.SDK.Editor {
             MultipleUserAreaProvidersFound,
 
             /// <summary>
-            /// if the scene has an AudioListener 
+            /// If the scene has an AudioListener 
             /// </summary>
-            AudioListenerFound
+            AudioListenerFound,
+
+            /// <summary>
+            /// Whether the scene name is allowed.
+            /// </summary>
+            SceneNameViolation
         }
 
         /// <summary>
@@ -77,7 +82,7 @@ namespace MXRUS.SDK.Editor {
         /// </summary>
         public Object Object { get; private set; }
 
-        public SceneExportViolation(Types type, bool preventsExport, string description, Object obj) {
+        public SceneExportViolation(Types type, bool preventsExport, string description, Object obj = null) {
             Type = type;
             PreventsExport = preventsExport;
             Description = description;
