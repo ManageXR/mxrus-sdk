@@ -49,10 +49,9 @@ namespace MXRUS.SDK {
             Gizmos.color = Color.yellow;
             GizmosX.DrawConcentricCirclesXZ(Vector3.zero, walkableRadius, PERIMETER_SEGMENTS, RING_COUNT);
 
-            // Draw lines to show forward and right directions relative to the avatars rotation
-            Gizmos.color = Color.white;
-            Gizmos.DrawLine(Vector3.zero, Vector3.forward * 2);
-            Gizmos.DrawLine(Vector3.zero, Vector3.right * 2);
+            // Draw a sector in the direction of the avatar
+            Gizmos.color = Color.green;
+            GizmosX.DrawSectorXZ(Vector3.zero, Vector3.forward, 90, 10, walkableRadius);
 
             // Draw avatar body
             Gizmos.color = Color.cyan;
@@ -66,6 +65,13 @@ namespace MXRUS.SDK {
                 new Vector3(ARM_LENGTH, ARM_WIDTH, ARM_WIDTH)
             );
             Gizmos.DrawSphere(Vector3.up * BODY_HEIGHT + (transform.up * HEAD_RADIUS), HEAD_RADIUS);
+
+            // Draw a VR headset
+            Gizmos.color = new Color(.4f, .4f, 1);
+            Gizmos.DrawCube(
+                (Vector3.up * (BODY_HEIGHT + HEAD_RADIUS * 1.25f)) + (.66f * HEAD_RADIUS * Vector3.forward),
+                new Vector3(HEAD_RADIUS * 1.5f, HEAD_RADIUS * .5f, HEAD_RADIUS)
+            );
 
             // Reset Gizmos class
             Gizmos.color = Color.white;
