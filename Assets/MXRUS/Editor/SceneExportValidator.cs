@@ -128,7 +128,10 @@ namespace MXRUS.SDK.Editor {
                 true,
                 "Custom scripts/components are not supported. Please remove or disable the gameobjects on the scene referencing them.",
                 x
-            )).ToList();
+            ).SetAutoResolver("Custom scripts attached to GameObjects in the scene will be removed.", obj => {
+                Undo.DestroyObjectImmediate(obj as MonoBehaviour);
+            }))
+            .ToList();
         }
 
         /// <summary>
@@ -142,7 +145,11 @@ namespace MXRUS.SDK.Editor {
                 true,
                 "Scene cameras are not supported. Please remove cameras from the scene.",
                 x
-            )).ToList();
+            )
+            .SetAutoResolver("GameObjects in the scene with Camera component will be destroyed.", obj => {
+                Undo.DestroyObjectImmediate((obj as Camera).gameObject);
+            })
+            ).ToList();
         }
 
         /// <summary>
@@ -178,7 +185,10 @@ namespace MXRUS.SDK.Editor {
                 "The scene cannot have any AudioListeners. When running in the ManageXR " +
                 "Homescreen, an AudioListener would already be present.",
                 x
-            )).ToList();
+            ).SetAutoResolver("AudioListener components in the scene will be removed from their GameObjects.", obj => {
+                Undo.DestroyObjectImmediate(obj as AudioListener);
+            })
+            ).ToList();
         }
 
         /// <summary>
@@ -192,7 +202,10 @@ namespace MXRUS.SDK.Editor {
                 true,
                 "There cannot be an EventSystem on the scene. Please remove them from the scene.",
                 x
-            )).ToList();
+            ).SetAutoResolver("GameObjects in the scene with EventSystem component will be destroyed.", obj => {
+                Undo.DestroyObjectImmediate((obj as EventSystem).gameObject);
+            })
+            ).ToList();
         }
 
         /// <summary>
@@ -206,9 +219,15 @@ namespace MXRUS.SDK.Editor {
                     new SceneExportViolation (
                         SceneExportViolation.Types.NoUserAreaProviderFound,
                         true,
-                        "No MonoUserAreaProvider component found on the scene.",
+                        "No user area provider found on the scene.",
                         null
-                    )
+                    ).SetAutoResolver("A new GameObject will be added to the scene with a user area provider.", obj =>{
+                        var userAreaProvider = new GameObject("User Area Provider");
+                        userAreaProvider.AddComponent<MonoCircularUserAreaProvider>();
+                        Selection.activeGameObject = userAreaProvider;
+                        SceneView.lastActiveSceneView.FrameSelected();
+                        Undo.RegisterCreatedObjectUndo(userAreaProvider, "Created User Area Provider");
+                    })
                 };
             else if (userAreas.Length > 1) {
                 return userAreas.Select(x => new SceneExportViolation(
