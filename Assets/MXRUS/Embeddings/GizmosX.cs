@@ -26,5 +26,27 @@ namespace MXRUS.SDK {
                 prevPoint = nextPoint;
             }
         }
+
+        public static void DrawSectorXZ(Vector3 center, Vector3 direction, float angle, int arcSegments, float radius) {
+            float dirAngle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
+            float halfAngle = angle * 0.5f;
+            float angleStep = angle / arcSegments;
+
+            // First spoke
+            float startAngle = dirAngle - halfAngle;
+            Vector3 prevPoint = center + new Vector3(Mathf.Cos(startAngle * Mathf.Deg2Rad), 0, Mathf.Sin(startAngle * Mathf.Deg2Rad)) * radius;
+            Gizmos.DrawLine(center, prevPoint);
+
+            // Arc edges and remaining spokes
+            for (int i = 1; i <= arcSegments; i++) {
+                float currentAngle = startAngle + angleStep * i;
+                Vector3 nextPoint = center + new Vector3(Mathf.Cos(currentAngle * Mathf.Deg2Rad), 0, Mathf.Sin(currentAngle * Mathf.Deg2Rad)) * radius;
+
+                Gizmos.DrawLine(prevPoint, nextPoint);
+                Gizmos.DrawLine(center, nextPoint);
+
+                prevPoint = nextPoint;
+            }
+        }
     }
 }
