@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
+
+using Object = UnityEngine.Object;
 
 namespace MXRUS.SDK.Editor {
     internal class SceneExportViolation {
@@ -73,6 +77,18 @@ namespace MXRUS.SDK.Editor {
         public bool PreventsExport { get; private set; }
 
         /// <summary>
+        /// Whether this violation can be automatically resolved
+        /// by the scene export window
+        /// </summary>
+        public bool CanBeAutoResolved { get; private set; }
+
+        /// <summary>
+        /// The confirmation message to be shown when the user
+        /// attempts to auto resolve this violation.
+        /// </summary>
+        public string AutoResolveConfirmationMessage { get; private set; }
+
+        /// <summary>
         /// Description of the violation
         /// </summary>
         public string Description { get; private set; }
@@ -82,11 +98,26 @@ namespace MXRUS.SDK.Editor {
         /// </summary>
         public Object Object { get; private set; }
 
+        private Action<Object> _resolveMethod;
+
         public SceneExportViolation(Types type, bool preventsExport, string description, Object obj = null) {
             Type = type;
             PreventsExport = preventsExport;
             Description = description;
             Object = obj;
+        }
+
+        public SceneExportViolation SetAutoResolver(string message, Action<Object> resolveMethod) {
+            AutoResolveConfirmationMessage = message;
+            CanBeAutoResolved = true;
+            _resolveMethod = resolveMethod;
+            return this;
+        }
+
+        public void AutoResolve() {
+            if (CanBeAutoResolved) {
+                _resolveMethod?.Invoke(Object);
+            }
         }
     }
 }

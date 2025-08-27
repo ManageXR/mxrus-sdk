@@ -207,13 +207,38 @@ namespace MXRUS.SDK.Editor {
 
                 var preventsExport = first.PreventsExport;
                 var description = first.Description;
+                var canBeAutoResolved = first.CanBeAutoResolved;
 
-                _foldoutStates[i] = EditorGUILayout.Foldout(
-                    _foldoutStates[i],
-                    $"{_violationTypes[i]} {(preventsExport ? " (Error)" : " (Warning)")}",
-                    true,
-                    preventsExport ? _errorFoldoutStyle : _warningFoldoutStyle
-                );
+                // Show the violation type with the Auto Resolve button, if applicable for this violation type
+                EditorGUILayout.BeginHorizontal();
+                {
+                    _foldoutStates[i] = EditorGUILayout.Foldout(
+                        _foldoutStates[i],
+                        $"{_violationTypes[i]} {(preventsExport ? " (Error)" : " (Warning)")}",
+                        true,
+                        preventsExport ? _errorFoldoutStyle : _warningFoldoutStyle
+                    );
+                    if (canBeAutoResolved) {
+                        GUILayout.Label("");
+                        if (GUILayout.Button("Auto Resolve")) {
+                            var accepted = EditorUtility.DisplayDialog(
+                                "Auto Resolving",
+                                first.AutoResolveConfirmationMessage + "\n\nDo you want to proceed?",
+                                "OK"
+                            );
+                            if (accepted) {
+                                foreach (var violationToResolve in violations) {
+                                    violationToResolve.AutoResolve();
+                                }
+                                Validate();
+                                EditorGUILayout.EndHorizontal();
+                                return;
+                            }
+                        }
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+
                 EditorGUILayout.Space(10);
 
                 if (!_foldoutStates[i]) continue;
