@@ -36,10 +36,18 @@ namespace MXRUS.SDK.Editor {
             Append(string.Empty);
 
             // Show files, if any
-            if (buildReport.files != null) {
+            BuildFile[] buildFiles;
+
+#if UNITY_2022_1_OR_NEWER
+            buildFiles = buildReport.GetFiles();
+#else
+            buildFiles = buildReport.files;
+#endif
+            
+            if (buildFiles != null) {
                 indentLevel = 1;
                 Append("files:");
-                foreach (var file in buildReport.files) {
+                foreach (var file in buildFiles) {
                     indentLevel = 2;
                     Append($"id: {file.id}");
                     Append($"path: {file.path}");
