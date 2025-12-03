@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
+using Unity.XR.MockHMD;
+using UnityEditor.XR.Management;
+using UnityEditor.XR.Management.Metadata;
 
 namespace MXRUS.SDK.Editor {
     internal class SceneExportValidator : ISceneExportValidator {
@@ -18,6 +21,14 @@ namespace MXRUS.SDK.Editor {
             var renderPipelineViolation = GetRenderPipelineViolation();
             if (renderPipelineViolation != null)
                 violations.Add(renderPipelineViolation);
+
+            var mockHMDDisabledViolation = GetMockHMDDisabledViolation();
+            if (mockHMDDisabledViolation != null)
+                violations.Add(mockHMDDisabledViolation);
+
+            var mockHMDRenderModeViolation = GetMockHMDRenderModeViolation();
+            if (mockHMDRenderModeViolation != null)
+                violations.Add(mockHMDRenderModeViolation);
 
             violations.AddRange(GetShaderViolations());
             violations.AddRange(GetScriptViolations());
@@ -38,7 +49,6 @@ namespace MXRUS.SDK.Editor {
             return violations;
         }
 
-
         /// <summary>
         /// Checks and ensures the project not configured to use a render pipeline other than Universal Render Pipeline
         /// </summary>
@@ -54,6 +64,59 @@ namespace MXRUS.SDK.Editor {
                 return null;
             else
                 return violation;
+        }
+
+
+        private SceneExportViolation GetMockHMDDisabledViolation() {
+            string loaderName = "MockHMDLoader";
+
+            if (!EditorBuildSettings.TryGetConfigObject("com.unity.xr.management.loader_settings",
+                    out XRGeneralSettingsPerBuildTarget buildTargetSettings)) {
+                return null;
+            }
+
+            var settings = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Android);
+            if (settings == null || settings.Manager == null) {
+                return null;
+            }
+
+            var activeLoaderNames = settings.Manager.activeLoaders
+                .Select(x => x.GetType().Name)
+                .ToList();
+
+            if (activeLoaderNames.Contains(loaderName)) {
+                return null;
+            }
+
+            return new SceneExportViolation(
+                SceneExportViolation.Types.MockHMDLoaderNotActive,
+                true,
+                "Mock HMD Loader is not active in XR Plug-In Management"
+            ).SetAutoResolver("This will active the Mock HMD Loader.", x => {
+                EditorUtility.SetDirty(settings);
+                XRPackageMetadataStore.AssignLoader(settings.Manager, loaderName, BuildTargetGroup.Android);
+                AssetDatabase.SaveAssets();
+            });
+        }
+
+        /// <summary>
+        /// Checks if the Mock HMD Loader has render mode set to multipass
+        /// </summary>
+        /// <returns></returns>
+        private SceneExportViolation GetMockHMDRenderModeViolation() {
+            var instance = MockHMDBuildSettings.Instance;
+            if (instance.renderMode == MockHMDBuildSettings.RenderMode.MultiPass) {
+                return null;
+            }
+
+            return new SceneExportViolation(
+                    SceneExportViolation.Types.MockHMDLoaderRenderModeNotMultiPass,
+                    true,
+                    "Mock HMD XR Loader render mode is not set to multipass"
+                ).SetAutoResolver("Set Render Mode to Multi Pass", x => {
+                    instance.renderMode = MockHMDBuildSettings.RenderMode.MultiPass;
+                    AssetDatabase.SaveAssets();
+                });
         }
 
         /// <summary>
@@ -251,9 +314,9 @@ namespace MXRUS.SDK.Editor {
             };
 
             var activeScene = SceneManager.GetActiveScene();
-            if(reservedNames.Contains(activeScene.name)) {
+            if (reservedNames.Contains(activeScene.name)) {
                 return new SceneExportViolation(
-                    SceneExportViolation.Types.SceneNameViolation,
+                    SceneExportViolation.Types.DisallowedSceneName,
                     true,
                     $"The scene name not allowed. The following names are prohibited: {string.Join(", ", reservedNames)}"
                 );

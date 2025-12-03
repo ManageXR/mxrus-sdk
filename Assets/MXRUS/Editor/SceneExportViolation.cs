@@ -63,7 +63,17 @@ namespace MXRUS.SDK.Editor {
             /// <summary>
             /// Whether the scene name is allowed.
             /// </summary>
-            SceneNameViolation
+            DisallowedSceneName,
+
+            /// <summary>
+            /// Whether the Mock HMD Loader is active
+            /// </summary>
+            MockHMDLoaderNotActive,
+
+            /// <summary>
+            /// Whether the Mock HMD Loader render pass is multipass
+            /// </summary>
+            MockHMDLoaderRenderModeNotMultiPass
         }
 
         /// <summary>
