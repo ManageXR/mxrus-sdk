@@ -179,6 +179,7 @@ namespace MXRUS.SDK.Editor {
         }
 
         private void Validate() {
+            AssetDatabase.SaveAssets();
             _violations = new SceneExportValidator().Validate();
             _violationTypes = _violations.Select(x => x.Type).Distinct().ToList();
             _foldoutStates = _violationTypes.Select(x => false).ToList();
