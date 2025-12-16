@@ -18,6 +18,10 @@ namespace MXRUS.SDK.Editor {
         public List<SceneExportViolation> Validate() {
             var violations = new List<SceneExportViolation>();
 
+            var unsupportedPlatformViolation = GetUnsupportedPlatformViolation();
+            if (unsupportedPlatformViolation != null) 
+                violations.Add(unsupportedPlatformViolation);
+
             var renderPipelineViolation = GetRenderPipelineViolation();
             if (renderPipelineViolation != null)
                 violations.Add(renderPipelineViolation);
@@ -47,6 +51,22 @@ namespace MXRUS.SDK.Editor {
                 violations.Add(sceneNameViolations);
 
             return violations;
+        }
+
+        private SceneExportViolation GetUnsupportedPlatformViolation() {
+            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android){
+                return null;
+            }
+
+            return new SceneExportViolation(
+                SceneExportViolation.Types.UnsupportedBuildTarget,
+                true,
+                "Current build target is unsupported. Switch platform to Android.",
+                null
+            ).SetAutoResolver("This will switch platform to Android.", x => {
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+            });
+
         }
 
         /// <summary>
@@ -113,7 +133,7 @@ namespace MXRUS.SDK.Editor {
                     SceneExportViolation.Types.MockHMDLoaderRenderModeNotMultiPass,
                     true,
                     "Mock HMD XR Loader render mode is not set to multipass"
-                ).SetAutoResolver("Set Render Mode to Multi Pass", x => {
+                ).SetAutoResolver("This will set Render Mode to Multi Pass", x => {
                     instance.renderMode = MockHMDBuildSettings.RenderMode.MultiPass;
                     AssetDatabase.SaveAssets();
                 });
@@ -191,7 +211,7 @@ namespace MXRUS.SDK.Editor {
                 true,
                 "Custom scripts/components are not supported. Please remove or disable the gameobjects on the scene referencing them.",
                 x
-            ).SetAutoResolver("Custom scripts attached to GameObjects in the scene will be removed.", obj => {
+            ).SetAutoResolver("This will remove custom scripts attached to GameObjects in the scene.", obj => {
                 Undo.DestroyObjectImmediate(obj as MonoBehaviour);
             }))
             .ToList();
@@ -209,7 +229,7 @@ namespace MXRUS.SDK.Editor {
                 "Scene cameras are not supported. Please remove cameras from the scene.",
                 x
             )
-            .SetAutoResolver("GameObjects in the scene with Camera component will be destroyed.", obj => {
+            .SetAutoResolver("This will destroy GameObjects in the scene with Camera component.", obj => {
                 Undo.DestroyObjectImmediate((obj as Camera).gameObject);
             })
             ).ToList();
@@ -248,7 +268,7 @@ namespace MXRUS.SDK.Editor {
                 "The scene cannot have any AudioListeners. When running in the ManageXR " +
                 "Homescreen, an AudioListener would already be present.",
                 x
-            ).SetAutoResolver("AudioListener components in the scene will be removed from their GameObjects.", obj => {
+            ).SetAutoResolver("This will remove AudioListener components in the scene.", obj => {
                 Undo.DestroyObjectImmediate(obj as AudioListener);
             })
             ).ToList();
@@ -265,7 +285,7 @@ namespace MXRUS.SDK.Editor {
                 true,
                 "There cannot be an EventSystem on the scene. Please remove them from the scene.",
                 x
-            ).SetAutoResolver("GameObjects in the scene with EventSystem component will be destroyed.", obj => {
+            ).SetAutoResolver("THis will destroy GameObjects in the scene with EventSystem component.", obj => {
                 Undo.DestroyObjectImmediate((obj as EventSystem).gameObject);
             })
             ).ToList();
