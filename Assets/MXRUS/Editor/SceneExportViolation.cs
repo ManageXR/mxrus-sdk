@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using UnityEngine;
 
@@ -73,7 +73,12 @@ namespace MXRUS.SDK.Editor {
             /// <summary>
             /// Whether the Mock HMD Loader render pass is multipass
             /// </summary>
-            MockHMDLoaderRenderModeNotMultiPass
+            MockHMDLoaderRenderModeNotMultiPass,
+            
+            /// <summary>
+            /// Whether the current platform is unsupported. Presently only Android is supported.
+            /// </summary>
+            UnsupportedBuildTarget
         }
 
         /// <summary>
