@@ -90,14 +90,26 @@ namespace MXRUS.SDK {
             compressionUtility.ExtractToDirectory(sourceFilePath, extractDirPath);
 
             // Attempt to load the bundles from the extract directory
-            var bundleNames = new string[] { 
-                ASSETS_ASSETBUNDLE_NAME, 
-                SCENE_ASSETBUNDLE_NAME, 
-                GetUnityGeneratedBundleName(extractDirPath)
+            List<string> failedBundleNames = new List<string>();
+            var bundleNames = new List<string> {
+                ASSETS_ASSETBUNDLE_NAME,
+                SCENE_ASSETBUNDLE_NAME
             };
+
+            // The Unity generated bundle is absent when the mxrus file is incomplete.
+            // Record it as a failed bundle instead of throwing, so that the code below
+            // deletes the extract directory and reports the error like any other bundle failure.
+            var unityGeneratedBundleName = GetUnityGeneratedBundleName(extractDirPath);
+            if (unityGeneratedBundleName == null) {
+                failedBundleNames.Add("*" + UNITY_GENERATED_ASSET_BUNDLE_EXT);
+                Debug.unityLogger.Log(LogType.Error, TAG, $"Found no {UNITY_GENERATED_ASSET_BUNDLE_EXT} asset bundle in {extractDirPath}");
+            }
+            else {
+                bundleNames.Add(unityGeneratedBundleName);
+            }
+
             Debug.unityLogger.Log(LogType.Log, TAG, $"Attempting to load the following asset bundles: {string.Join(", ", bundleNames)}");
 
-            List<string> failedBundleNames = new List<string>();
             foreach (var bundleName in bundleNames) {
                 try {
                     var loadedBundle = await LoadAssetBundleAsync(Path.Combine(extractDirPath, bundleName));
@@ -157,9 +169,13 @@ namespace MXRUS.SDK {
         // Unity generates an additional asset bundle when we export the mxrus file
         // During export, this file is renamed to have a custom extension that can be used
         // to find it.
+        // Returns null if the directory is absent or holds no such file.
         private string GetUnityGeneratedBundleName(string directoryPath) {
+            if (!Directory.Exists(directoryPath))
+                return null;
+
             return Directory.GetFiles(directoryPath, "*", SearchOption.TopDirectoryOnly)
-                .First(x => Path.GetExtension(x).Equals(UNITY_GENERATED_ASSET_BUNDLE_EXT));
+                .FirstOrDefault(x => Path.GetExtension(x).Equals(UNITY_GENERATED_ASSET_BUNDLE_EXT));
         }
     }
 }
